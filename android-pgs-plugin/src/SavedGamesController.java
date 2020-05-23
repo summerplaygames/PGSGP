@@ -38,7 +38,7 @@ public class SavedGamesController {
 
     protected void showSavedGamesUI(String title, boolean allowAddBtn, boolean allowDeleteBtn, int maxNumberOfSavedGamesToShow) {
         GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(activity);
-        if (connectionController.isConnected().first && googleSignInAccount != null) {
+        if (connectionController.isConnected() && googleSignInAccount != null) {
             SnapshotsClient snapshotsClient = Games.getSnapshotsClient(activity, googleSignInAccount);
             Task<Intent> intentTask = snapshotsClient.getSelectSnapshotIntent(title, allowAddBtn, allowDeleteBtn, maxNumberOfSavedGamesToShow);
 
@@ -57,7 +57,7 @@ public class SavedGamesController {
                 .setDescription(desc)
                 .build();
         GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(activity);
-        if (connectionController.isConnected().first && googleSignInAccount != null) {
+        if (connectionController.isConnected() && googleSignInAccount != null) {
             SnapshotsClient snapshotsClient = Games.getSnapshotsClient(activity, googleSignInAccount);
             Task<SnapshotMetadata> task = snapshotsClient.commitAndClose(snapshot, metadataChange);
             task.addOnCompleteListener(new OnCompleteListener<SnapshotMetadata>() {
@@ -78,7 +78,7 @@ public class SavedGamesController {
 
     protected void saveSnapshot(String gameName, final String dataToSave, final String description) {
         GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(activity);
-        if (connectionController.isConnected().first && googleSignInAccount != null) {
+        if (connectionController.isConnected() && googleSignInAccount != null) {
             SnapshotsClient snapshotsClient = Games.getSnapshotsClient(activity, googleSignInAccount);
             int conflictResolutionPolicy = SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED;
             
@@ -116,7 +116,7 @@ public class SavedGamesController {
 
     void loadSnapshot(String gameName) {
         GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(activity);
-        if (connectionController.isConnected().first && googleSignInAccount != null) {
+        if (connectionController.isConnected() && googleSignInAccount != null) {
             SnapshotsClient snapshotsClient = Games.getSnapshotsClient(activity, googleSignInAccount);
             int conflictResolutionPolicy = SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED;
 

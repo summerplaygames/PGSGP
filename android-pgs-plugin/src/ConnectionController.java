@@ -18,18 +18,25 @@ public class ConnectionController {
         this.godotCallbacksUtils = godotCallbacksUtils;
     }
 
-    public Pair<Boolean, String> isConnected() {
+    public  boolean isConnected() {
+        return getConnectionInfo().isConnected();
+    }
+
+    public ConnectionInfo getConnectionInfo() {
         GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(activity);
         
         String accId = "";
+        String token = "";
         if (googleSignInAccount != null && googleSignInAccount.getId() != null) {
             accId = googleSignInAccount.getId();
+            token = googleSignInAccount.getIdToken();
         }
-        return new Pair<>(GoogleSignIn.hasPermissions(googleSignInAccount, signInOptions.getScopeArray()), accId);
+        boolean connected = GoogleSignIn.hasPermissions(googleSignInAccount, signInOptions.getScopeArray());
+        return new ConnectionInfo(connected, accId, token);
     }
 
     public void checkIsConnected() {
-        Pair<Boolean, String> pair = isConnected();
-        godotCallbacksUtils.invokeGodotCallback(GodotCallbacksUtils.PLAYER_CONNECTED, new Object[]{pair.first, pair.second});
+        ConnectionInfo c = getConnectionInfo();
+        godotCallbacksUtils.invokeGodotCallback(GodotCallbacksUtils.PLAYER_CONNECTED, new Object[]{c.isConnected(), c.getAccountId()});
     }
 }

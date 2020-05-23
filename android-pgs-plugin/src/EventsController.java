@@ -30,7 +30,7 @@ public class EventsController {
 
     public void submitEvent(String eventId, int incrementBy) {
         GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(activity);
-        if (connectionController.isConnected().first && googleSignInAccount != null) {
+        if (connectionController.isConnected() && googleSignInAccount != null) {
             Games.getEventsClient(activity, googleSignInAccount).increment(eventId, incrementBy);
             godotCallbacksUtils.invokeGodotCallback(GodotCallbacksUtils.EVENT_SUBMITTED, new Object[]{eventId});
         } else {
@@ -40,7 +40,7 @@ public class EventsController {
 
     public void loadEvents() {
         GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(activity);
-        if (connectionController.isConnected().first && googleSignInAccount != null) {
+        if (connectionController.isConnected() && googleSignInAccount != null) {
             Games.getEventsClient(activity, googleSignInAccount)
                     .load(true)
                     .addOnCompleteListener(new OnCompleteListener<AnnotatedData<EventBuffer>>() {
@@ -69,7 +69,7 @@ public class EventsController {
 
     public void loadEventById(String[] eventIds) {
         GoogleSignInAccount googleSignInAccount = GoogleSignIn.getLastSignedInAccount(activity);
-        if (connectionController.isConnected().first && googleSignInAccount != null) {
+        if (connectionController.isConnected() && googleSignInAccount != null) {
             Games.getEventsClient(activity, googleSignInAccount)
                     .loadByIds(true, eventIds)
                     .addOnCompleteListener(new OnCompleteListener<AnnotatedData<EventBuffer>>() {

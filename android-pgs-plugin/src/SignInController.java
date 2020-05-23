@@ -33,9 +33,9 @@ public class SignInController {
     }
 
     public void signIn(final GoogleSignInClient googleSignInClient) {
-        Pair<Boolean, String> connection = connectionController.isConnected();
-        if (connection.first) {
-            godotCallbacksUtils.invokeGodotCallback(GodotCallbacksUtils.SIGNIN_SUCCESSFUL, new Object[]{connection.second});
+        ConnectionInfo connection = connectionController.getConnectionInfo();
+        if (connection.isConnected()) {
+            godotCallbacksUtils.invokeGodotCallback(GodotCallbacksUtils.SIGNIN_SUCCESSFUL, new Object[]{connection.getAccountId(), connection.getToken()});
             enablePopUps();
         } else {
             googleSignInClient
@@ -46,12 +46,15 @@ public class SignInController {
                             if (task.isSuccessful()) {
                                 GoogleSignInAccount googleSignInAccount = task.getResult();
                                 String accId = "";
-					            if (googleSignInAccount != null && googleSignInAccount.getId() != null) {
-					            	accId = googleSignInAccount.getId();
-					            }
+                                String token = "";
+                                if (googleSignInAccount != null && googleSignInAccount.getId() != null) {
+                                    accId = googleSignInAccount.getId();
+                                    token = googleSignInAccount.getIdToken();
+                                }
 
-                                godotCallbacksUtils.invokeGodotCallback(GodotCallbacksUtils.SIGNIN_SUCCESSFUL, new Object[]{accId});
+                                godotCallbacksUtils.invokeGodotCallback(GodotCallbacksUtils.SIGNIN_SUCCESSFUL, new Object[]{accId, token});
                                 enablePopUps();
+
                             } else {
                                 Intent intent = googleSignInClient.getSignInIntent();
                                 activity.startActivityForResult(intent, RC_SIGN_IN);
@@ -65,17 +68,23 @@ public class SignInController {
         if (googleSignInResult != null && googleSignInResult.isSuccess()) {
             GoogleSignInAccount googleSignInAccount = googleSignInResult.getSignInAccount();
             String accId = "";
+            String token = "";
             if (googleSignInAccount != null && googleSignInAccount.getId() != null) {
-            	accId = googleSignInAccount.getId();
+                accId = googleSignInAccount.getId();
+                token = googleSignInAccount.getIdToken();
             }
             enablePopUps();
-            godotCallbacksUtils.invokeGodotCallback(GodotCallbacksUtils.SIGNIN_SUCCESSFUL, new Object[]{accId});
+            godotCallbacksUtils.invokeGodotCallback(GodotCallbacksUtils.SIGNIN_SUCCESSFUL, new Object[]{accId, token});
         } else {
         	int statusCode = Integer.MIN_VALUE;
+        	String statusMessage = "";
         	if (googleSignInResult != null && googleSignInResult.getStatus() != null){
         		statusCode = googleSignInResult.getStatus().getStatusCode();
+        		if (googleSignInResult.getStatus().getStatusMessage() != null) {
+                    statusMessage = googleSignInResult.getStatus().getStatusMessage();
+                }
         	}
-            godotCallbacksUtils.invokeGodotCallback(GodotCallbacksUtils.SIGNIN_FAILED, new Object[]{statusCode});
+            godotCallbacksUtils.invokeGodotCallback(GodotCallbacksUtils.SIGNIN_FAILED, new Object[]{statusCode, statusMessage});
         }
     }
     

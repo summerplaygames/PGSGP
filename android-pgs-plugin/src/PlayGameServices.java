@@ -61,17 +61,15 @@ public class PlayGameServices extends Godot.SingletonBase {
                 });
     }
 
-    private void initializePlayGameServices(boolean enableSaveGamesFunctionality) {
-        GoogleSignInOptions signInOptions = null;
-         
-        if (enableSaveGamesFunctionality) {
-            GoogleSignInOptions.Builder signInOptionsBuilder = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
-            signInOptionsBuilder.requestScopes(Drive.SCOPE_APPFOLDER).requestId();
-            signInOptions = signInOptionsBuilder.build();
-        } else {
-            signInOptions = GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN;
+    private void initializePlayGameServices(boolean enableSaveGamesFunctionality, String clientId) {
+        GoogleSignInOptions.Builder signInOptionsBuilder = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).requestId();
+        if (clientId != null && !clientId.isEmpty()) {
+            signInOptionsBuilder = signInOptionsBuilder.requestIdToken(clientId);
         }
-         
+        if (enableSaveGamesFunctionality) {
+            signInOptionsBuilder = signInOptionsBuilder.requestScopes(Drive.SCOPE_APPFOLDER);
+        }
+        GoogleSignInOptions signInOptions = signInOptionsBuilder.build();
         godotCallbacksUtils = new GodotCallbacksUtils();
         connectionController = new ConnectionController(appActivity, signInOptions, godotCallbacksUtils);
         signInController = new SignInController(appActivity, godotCallbacksUtils, connectionController);
@@ -93,8 +91,8 @@ public class PlayGameServices extends Godot.SingletonBase {
             GoogleSignInResult googleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             signInController.onSignInActivityResult(googleSignInResult);
         } else if (requestCode == AchievementsController.RC_ACHIEVEMENT_UI || requestCode == LeaderboardsController.RC_LEADERBOARD_UI) {
-            Pair<Boolean, String> isConnected = connectionController.isConnected();
-            godotCallbacksUtils.invokeGodotCallback(GodotCallbacksUtils.PLAYER_CONNECTED, new Object[]{isConnected.first, isConnected.second});
+            ConnectionInfo connection = connectionController.getConnectionInfo();
+            godotCallbacksUtils.invokeGodotCallback(GodotCallbacksUtils.PLAYER_CONNECTED, new Object[]{connection.isConnected(), connection.getAccountId()});
         } else if (requestCode == SavedGamesController.RC_SAVED_GAMES) {
             if (data != null) {
                 if (data.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_METADATA)) {
@@ -113,11 +111,11 @@ public class PlayGameServices extends Godot.SingletonBase {
     }
 
 
-    public void init(final int instanceId, final boolean enablePopups, final boolean enableSaveGames) {
+    public void init(final int instanceId, final boolean enablePopups, final boolean enableSaveGames, final String clientId) {
         appActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                initializePlayGameServices(enableSaveGames);
+                initializePlayGameServices(enableSaveGames, clientId);
 
                 godotCallbacksUtils.setGodotInstanceId(instanceId);
                 signInController.setShowPopups(enablePopups);
